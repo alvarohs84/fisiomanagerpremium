@@ -4,15 +4,25 @@ from sqlalchemy.orm import Session
 from database import Base, engine, get_db
 from models import User
 from auth import hash_password
+
+# Importando seus roteadores
 from routers import users, patients, evolutions, appointments
 
+# Cria as tabelas
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="FisioManager Backend")
 
+# --- CONFIGURAÇÃO DE CORS ATUALIZADA ---
+origins = [
+    "http://localhost:3000",
+    "https://fisiomanager-frontend1.onrender.com", # Seu Front
+    "https://fisiomanager-frontend1.onrender.com/"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ou coloque somente seu frontend
+    allow_origins=origins, # Use a lista específica
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -20,7 +30,7 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"message": "FisioManager Backend OK (CORS liberado)"}
+    return {"message": "FisioManager Backend OK (CORS Configurado)"}
 
 @app.post("/create-admin")
 def create_admin(db: Session = Depends(get_db)):
@@ -46,6 +56,7 @@ def create_admin(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Incluindo as rotas
 app.include_router(users.router)
 app.include_router(patients.router)
 app.include_router(evolutions.router)

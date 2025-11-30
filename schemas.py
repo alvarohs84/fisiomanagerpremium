@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from datetime import date
+from typing import Optional
 
 # =============================
 # AUTH
@@ -10,25 +12,42 @@ class Token(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
-
+    
+class AdminCreate(BaseModel):
+    username: str
+    password: str
 
 # =============================
 # PACIENTES
 # =============================
-class PatientCreate(BaseModel):
+class PatientBase(BaseModel):
     name: str
-    age: int
-    plan: str
+    birth_date: date            # Recebe data (AAAA-MM-DD)
+    sex: Optional[str] = None
+    phone: Optional[str] = None
+    insurance: Optional[str] = None # Antigo 'plan', agora 'insurance' (Convênio)
 
-class PatientOut(BaseModel):
+class PatientCreate(PatientBase):
+    pass
+
+class PatientOut(PatientBase):
     id: int
-    name: str
-    age: int
-    plan: str
+    idade: int # Campo extra que calcularemos automaticamente
 
+    # Configuração deve ficar DENTRO da classe
     class Config:
         from_attributes = True
 
+    # Lógica para calcular a idade ao enviar a resposta
+    @staticmethod
+    def calculate_age(birth_date: date) -> int:
+        today = date.today()
+        return today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+
+    def model_dump(self, **kwargs):
+        data = super().model_dump(**kwargs)
+        data['idade'] = self.calculate_age(self.birth_date)
+        return data
 
 # =============================
 # EVOLUTIONS
@@ -45,7 +64,6 @@ class EvolutionOut(BaseModel):
     class Config:
         from_attributes = True
 
-
 # =============================
 # APPOINTMENTS
 # =============================
@@ -53,14 +71,18 @@ class AppointmentCreate(BaseModel):
     patient_id: int
     date: str
     time: str
-    notes: str | None = None
+    notes: Optional[str] = None
 
 class AppointmentOut(BaseModel):
     id: int
     patient_id: int
     date: str
     time: str
-    notes: str | None
+    notes: Optional[str] = None
 
     class Config:
         from_attributes = True
+        
+
+        
+        
