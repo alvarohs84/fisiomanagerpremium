@@ -63,12 +63,15 @@ app.include_router(evolutions.router)
 app.include_router(appointments.router)
 
 # ==========================================
-# ROTA DE EMERGÊNCIA (PARA RESETAR O BANCO)
+# ROTA DE EMERGÊNCIA (COLE ISSO NO MAIN.PY)
 # ==========================================
+from database import engine
+import models
+
 @app.get("/reset-database-force")
-def reset_database(db: Session = Depends(get_db)):
-    # CUIDADO: ISSO APAGA TUDO!
+def reset_database():
+    # Isso apaga a tabela velha e cria a nova
     models.Base.metadata.drop_all(bind=engine)
     models.Base.metadata.create_all(bind=engine)
-    return {"message": "Banco de dados apagado e recriado com sucesso (Tabelas atualizadas)!"}
+    return {"message": "Banco de dados RESETADO com sucesso! Tabela pacientes atualizada."}
 
