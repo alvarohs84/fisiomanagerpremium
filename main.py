@@ -62,3 +62,13 @@ app.include_router(patients.router)
 app.include_router(evolutions.router)
 app.include_router(appointments.router)
 
+# ==========================================
+# ROTA DE EMERGÊNCIA (PARA RESETAR O BANCO)
+# ==========================================
+@app.get("/reset-database-force")
+def reset_database(db: Session = Depends(get_db)):
+    # CUIDADO: ISSO APAGA TUDO!
+    models.Base.metadata.drop_all(bind=engine)
+    models.Base.metadata.create_all(bind=engine)
+    return {"message": "Banco de dados apagado e recriado com sucesso (Tabelas atualizadas)!"}
+
