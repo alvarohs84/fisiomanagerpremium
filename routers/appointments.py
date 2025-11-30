@@ -1,28 +1,24 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
-from models import Appointment
-from schemas import AppointmentCreate
-from datetime import date
+from models import Appointment, Patient
+from schemas import AppointmentCreate, AppointmentOut
 
-router = APIRouter(prefix="/appointments")
+router = APIRouter(prefix="/appointments", tags=["Appointments"])
 
-@router.get("")
-def list(db: Session = Depends(get_db)):
-    return db.query(Appointment).all()
+@router.post("/", response_model=AppointmentOut)
+def create_appointment(data: AppointmentCreate, db: Session = Depends(get_db)):
 
-@router.get("/today")
-def today(db: Session = Depends(get_db)):
-    today = date.today()
-    return db.query(Appointment).filter(Appointment.date == today).all()
+    patient = db.query(Patient).filter(Patient.id == data.patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Paciente não encontrado")
 
-@router.get("/by-patient/{name}")
-def patient(name: str, db: Session = Depends(get_db)):
-    return db.query(Appointment).filter(Appointment.patient_name == name).all()
-
-@router.post("")
-def create(data: AppointmentCreate, db: Session = Depends(get_db)):
-    a = Appointment(**data.dict())
-    db.add(a)
+    appt = Appointment(**data.dict())
+    db.add(appt)
     db.commit()
-    return a
+    db.refresh(appt)
+    return appt
+
+@router.get("/patient/{patient_id}", response_model=list[AppointmentOut])
+def list_appointments(patient_id: int, db: Session = Depends(get_db)):
+    return db.query(Appointment).filter(Appointment.patient_id == patient_id).all()

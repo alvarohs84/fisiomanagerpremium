@@ -1,39 +1,38 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 from models import Patient
-from schemas import PatientCreate
+from schemas import PatientCreate, PatientOut
 
-router = APIRouter(prefix="/patients")
+router = APIRouter(prefix="/patients", tags=["Patients"])
 
-@router.get("")
-def list(db: Session = Depends(get_db)):
+@router.post("/", response_model=PatientOut)
+def create_patient(data: PatientCreate, db: Session = Depends(get_db)):
+    patient = Patient(**data.dict())
+    db.add(patient)
+    db.commit()
+    db.refresh(patient)
+    return patient
+
+@router.get("/", response_model=list[PatientOut])
+def list_patients(db: Session = Depends(get_db)):
     return db.query(Patient).all()
 
-@router.post("")
-def create(data: PatientCreate, db: Session = Depends(get_db)):
-    p = Patient(**data.dict())
-    db.add(p)
-    db.commit()
-    return p
+@router.get("/{patient_id}", response_model=PatientOut)
+def get_patient(patient_id: int, db: Session = Depends(get_db)):
+    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Paciente não encontrado")
+    return patient
 
-@router.get("/{id}")
-def get(id: int, db: Session = Depends(get_db)):
-    return db.query(Patient).filter(Patient.id == id).first()
-
-@router.put("/{id}")
-def update(id: int, data: PatientCreate, db: Session = Depends(get_db)):
-    p = db.query(Patient).filter(Patient.id == id).first()
-    for k, v in data.dict().items():
-        setattr(p, k, v)
+@router.delete("/{patient_id}")
+def delete_patient(patient_id: int, db: Session = Depends(get_db)):
+    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Paciente não encontrado")
+    db.delete(patient)
     db.commit()
-    return p
+    return {"message": "Paciente removido"}
 
-@router.delete("/{id}")
-def delete(id: int, db: Session = Depends(get_db)):
-    p = db.query(Patient).filter(Patient.id == id).first()
-    db.delete(p)
-    db.commit()
-    return {"detail": "Paciente removido"}
 
 

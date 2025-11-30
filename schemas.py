@@ -1,98 +1,66 @@
 from pydantic import BaseModel
-from typing import Optional
 
-
-# ======================================================
-# TOKEN PARA AUTENTICAÇÃO JWT
-# ======================================================
-
+# =============================
+# AUTH
+# =============================
 class Token(BaseModel):
     access_token: str
-    token_type: str = "bearer"
-
-class TokenData(BaseModel):
-    username: Optional[str] = None
-
-
-# ======================================================
-# LOGIN DO USUÁRIO
-# ======================================================
+    token_type: str
 
 class UserLogin(BaseModel):
     username: str
     password: str
 
 
-# ======================================================
-# USUÁRIO
-# ======================================================
-
-class UserBase(BaseModel):
-    username: str
-
-class UserCreate(UserBase):
-    password: str
-
-class User(UserBase):
-    id: int
-
-    class Config:
-        from_attributes = True
-
-
-# ======================================================
+# =============================
 # PACIENTES
-# ======================================================
-
-class PatientBase(BaseModel):
+# =============================
+class PatientCreate(BaseModel):
     name: str
     age: int
     plan: str
 
-class PatientCreate(PatientBase):
-    pass
-
-class Patient(PatientBase):
+class PatientOut(BaseModel):
     id: int
+    name: str
+    age: int
+    plan: str
 
     class Config:
         from_attributes = True
 
 
-# ======================================================
-# EVOLUÇÕES
-# ======================================================
-
-class EvolutionBase(BaseModel):
+# =============================
+# EVOLUTIONS
+# =============================
+class EvolutionCreate(BaseModel):
     patient_id: int
     description: str
 
-class EvolutionCreate(EvolutionBase):
-    pass
-
-class Evolution(EvolutionBase):
+class EvolutionOut(BaseModel):
     id: int
+    patient_id: int
+    description: str
 
     class Config:
         from_attributes = True
 
-# ======================================================
-# AGENDAMENTOS - SCHEMAS
-# ======================================================
 
-class AppointmentBase(BaseModel):
+# =============================
+# APPOINTMENTS
+# =============================
+class AppointmentCreate(BaseModel):
     patient_id: int
     date: str
     time: str
-    notes: Optional[str] = None
+    notes: str | None = None
 
-
-class AppointmentCreate(AppointmentBase):
-    pass
-
-
-class Appointment(AppointmentBase):
+class AppointmentOut(BaseModel):
     id: int
+    patient_id: int
+    date: str
+    time: str
+    notes: str | None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
