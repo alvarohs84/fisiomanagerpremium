@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Date
 from sqlalchemy.orm import relationship
 from database import Base
-from datetime import date  # <--- IMPORTANTE
+from datetime import date
 
 # ======================================================
 # USUÁRIOS
@@ -27,16 +27,14 @@ class Patient(Base):
     phone = Column(String, nullable=True)
     insurance = Column(String, nullable=True)
 
-    evolutions = relationship("Evolution", back_populates="patient")
-    appointments = relationship("Appointment", back_populates="patient")
+    # Relacionamentos
+    evolutions = relationship("Evolution", back_populates="patient", cascade="all, delete-orphan")
+    appointments = relationship("Appointment", back_populates="patient", cascade="all, delete-orphan")
 
-    # --- O SEGREDO DO FIX: CAMPO CALCULADO ---
     @property
     def idade(self):
-        if not self.birth_date:
-            return 0
+        if not self.birth_date: return 0
         today = date.today()
-        # Cálculo preciso da idade
         return today.year - self.birth_date.year - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
 
 # ======================================================
@@ -52,15 +50,17 @@ class Evolution(Base):
     patient = relationship("Patient", back_populates="evolutions")
 
 # ======================================================
-# AGENDAMENTOS
+# AGENDAMENTOS (AGENDA) - ATUALIZADO
 # ======================================================
 class Appointment(Base):
     __tablename__ = "appointments"
 
     id = Column(Integer, primary_key=True, index=True)
     patient_id = Column(Integer, ForeignKey("patients.id"))
-    date = Column(String)
-    time = Column(String)
+    
+    start_time = Column(DateTime, nullable=False) # Data e Hora de Início
+    end_time = Column(DateTime, nullable=False)   # Data e Hora de Fim
+    status = Column(String, default="Agendado")   # Agendado, Realizado, Cancelado
     notes = Column(String, nullable=True)
     
     patient = relationship("Patient", back_populates="appointments")

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
-from datetime import date
-from typing import Optional, List
+from datetime import date, datetime
+from typing import Optional
 
 # =============================
 # AUTH
@@ -32,8 +32,7 @@ class PatientCreate(PatientBase):
 
 class PatientOut(PatientBase):
     id: int
-    idade: int  # O Pydantic agora vai ler isso da @property do model!
-
+    idade: int
     class Config:
         from_attributes = True
 
@@ -48,25 +47,31 @@ class EvolutionOut(BaseModel):
     id: int
     patient_id: int
     description: str
-
     class Config:
         from_attributes = True
 
 # =============================
-# APPOINTMENTS
+# APPOINTMENTS (AGENDA) - NOVO
 # =============================
-class AppointmentCreate(BaseModel):
+class AppointmentBase(BaseModel):
     patient_id: int
-    date: str
-    time: str
+    start_time: datetime
+    end_time: datetime
+    status: Optional[str] = "Agendado"
     notes: Optional[str] = None
 
-class AppointmentOut(BaseModel):
-    id: int
-    patient_id: int
-    date: str
-    time: str
+class AppointmentCreate(AppointmentBase):
+    pass
+
+class AppointmentUpdate(BaseModel):
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    status: Optional[str] = None
     notes: Optional[str] = None
+
+class AppointmentOut(AppointmentBase):
+    id: int
+    patient_name: str = "Desconhecido" # Enviaremos o nome junto
 
     class Config:
         from_attributes = True
