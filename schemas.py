@@ -76,6 +76,25 @@ class AppointmentOut(AppointmentBase):
     class Config:
         from_attributes = True
         
+        # ... (Mantenha os schemas anteriores) ...
+
+# =============================
+# FINANCEIRO (NOVO)
+# =============================
+class TransactionBase(BaseModel):
+    description: str
+    amount: float
+    type: str # "entrada" ou "saida"
+
+class TransactionCreate(TransactionBase):
+    pass
+
+class TransactionOut(TransactionBase):
+    id: int
+    date: datetime
+    class Config:
+        from_attributes = True
+        
 
         
         

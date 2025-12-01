@@ -84,4 +84,5 @@ app.include_router(patients.router)
 # Se existirem, deixe descomentado:
 app.include_router(evolutions.router) 
 app.include_router(appointments.router)
+app.include_router(finance.router)
 

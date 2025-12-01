@@ -67,3 +67,17 @@ class Appointment(Base):
     notes = Column(String, nullable=True)
     
     patient = relationship("Patient", back_populates="appointments")
+    
+    # ... (Mantenha os imports e classes anteriores: User, Patient, Evolution, Appointment) ...
+
+# ======================================================
+# FINANCEIRO (NOVO)
+# ======================================================
+class Transaction(Base):
+    __tablename__ = "transactions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    description = Column(String, nullable=False) # Ex: "Pagamento Sr. João"
+    amount = Column(Float, nullable=False)       # Ex: 150.00
+    type = Column(String, nullable=False)        # "entrada" ou "saida"
+    date = Column(DateTime, default=datetime.utcnow)
