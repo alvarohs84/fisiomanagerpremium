@@ -2,9 +2,7 @@ from pydantic import BaseModel
 from datetime import date, datetime
 from typing import Optional
 
-# =============================
 # AUTH
-# =============================
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -17,12 +15,11 @@ class AdminCreate(BaseModel):
     username: str
     password: str
 
-# =============================
 # PACIENTES
-# =============================
 class PatientBase(BaseModel):
     name: str
-    birth_date: date            
+    # Agora tudo é opcional exceto o nome
+    birth_date: Optional[date] = None            
     sex: Optional[str] = None
     phone: Optional[str] = None
     insurance: Optional[str] = None
@@ -30,15 +27,20 @@ class PatientBase(BaseModel):
 class PatientCreate(PatientBase):
     pass
 
+class PatientUpdate(BaseModel): # Novo Schema para Edição
+    name: Optional[str] = None
+    birth_date: Optional[date] = None
+    sex: Optional[str] = None
+    phone: Optional[str] = None
+    insurance: Optional[str] = None
+
 class PatientOut(PatientBase):
     id: int
     idade: int
     class Config:
         from_attributes = True
 
-# =============================
-# EVOLUTIONS
-# =============================
+# EVOLUÇÕES
 class EvolutionCreate(BaseModel):
     patient_id: int
     description: str
@@ -47,12 +49,11 @@ class EvolutionOut(BaseModel):
     id: int
     patient_id: int
     description: str
+    date: datetime
     class Config:
         from_attributes = True
 
-# =============================
-# APPOINTMENTS (AGENDA) - NOVO
-# =============================
+# AGENDA
 class AppointmentBase(BaseModel):
     patient_id: int
     start_time: datetime
@@ -71,8 +72,7 @@ class AppointmentUpdate(BaseModel):
 
 class AppointmentOut(AppointmentBase):
     id: int
-    patient_name: str = "Desconhecido" # Enviaremos o nome junto
-
+    patient_name: str = "Desconhecido"
     class Config:
         from_attributes = True
         
