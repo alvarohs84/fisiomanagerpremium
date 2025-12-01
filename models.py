@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Date, Float # <--- Adicionei Float aqui
 from sqlalchemy.orm import relationship
 from database import Base
 from datetime import date, datetime
@@ -28,7 +28,7 @@ class Patient(Base):
     phone = Column(String, nullable=True)
     insurance = Column(String, nullable=True)
 
-    # Relacionamentos com cascade (apaga tudo se o paciente for deletado)
+    # Relacionamentos
     evolutions = relationship("Evolution", back_populates="patient", cascade="all, delete-orphan")
     appointments = relationship("Appointment", back_populates="patient", cascade="all, delete-orphan")
 
@@ -67,17 +67,15 @@ class Appointment(Base):
     notes = Column(String, nullable=True)
     
     patient = relationship("Patient", back_populates="appointments")
-    
-    # ... (Mantenha os imports e classes anteriores: User, Patient, Evolution, Appointment) ...
 
 # ======================================================
-# FINANCEIRO (NOVO)
+# FINANCEIRO
 # ======================================================
 class Transaction(Base):
     __tablename__ = "transactions"
 
     id = Column(Integer, primary_key=True, index=True)
-    description = Column(String, nullable=False) # Ex: "Pagamento Sr. João"
-    amount = Column(Float, nullable=False)       # Ex: 150.00
-    type = Column(String, nullable=False)        # "entrada" ou "saida"
+    description = Column(String, nullable=False)
+    amount = Column(Float, nullable=False) # Agora vai funcionar porque importamos Float
+    type = Column(String, nullable=False)
     date = Column(DateTime, default=datetime.utcnow)
