@@ -1,43 +1,27 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
-from models import User
-from schemas import UserLogin, Token, AdminCreate
-from auth import verify_password, create_access_token, hash_password
+import models
+import schemas
+import auth
 
-router = APIRouter(prefix="", tags=["Users"])
+router = APIRouter(prefix="/users", tags=["Users"])
 
-
-@router.post("/create-admin")
-def create_admin(data: AdminCreate, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == data.username).first()
-
-    if user:
-        raise HTTPException(status_code=400, detail="Usuário já existe")
-
-    new_user = User(
-        username=data.username,
-        hashed_password=hash_password(data.password)
-    )
-
-    db.add(new_user)
+@router.patch("/me/password")
+def change_password(
+    data: schemas.UserPasswordUpdate, 
+    db: Session = Depends(get_db), 
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    # 1. Verifica se a senha antiga bate com a do banco
+    if not auth.verify_password(data.old_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Senha antiga incorreta")
+    
+    # 2. Gera o hash da nova senha
+    new_hash = auth.hash_password(data.new_password)
+    
+    # 3. Salva no banco
+    current_user.hashed_password = new_hash
     db.commit()
-    db.refresh(new_user)
-
-    return {"message": "Admin criado com sucesso"}
-
-
-@router.post("/token", response_model=Token)
-def login(form: UserLogin, db: Session = Depends(get_db)):
-
-    user = db.query(User).filter(User.username == form.username).first()
-
-    if not user or not verify_password(form.password, user.hashed_password):
-        raise HTTPException(status_code=400, detail="Usuário ou senha incorretos")
-
-    token = create_access_token({"sub": user.username})
-
-    return {
-        "access_token": token,
-        "token_type": "bearer"
-    }
+    
+    return {"message": "Senha atualizada com sucesso"}

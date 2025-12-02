@@ -105,4 +105,11 @@ class AssessmentOut(BaseModel):
     class Config:
         from_attributes = True
         
+        # =============================
+# USUÁRIOS (UPDATE)
+# =============================
+class UserPasswordUpdate(BaseModel):
+    old_password: str
+    new_password: str
+        
         
