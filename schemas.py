@@ -111,5 +111,21 @@ class AssessmentOut(BaseModel):
 class UserPasswordUpdate(BaseModel):
     old_password: str
     new_password: str
+    
+    # EVOLUÇÕES
+# =============================
+class EvolutionCreate(BaseModel):
+    patient_id: int
+    description: str
+    content: Optional[Dict[str, Any]] = None # Agora aceita JSON opcional
+
+class EvolutionOut(BaseModel):
+    id: int
+    patient_id: int
+    description: str
+    content: Optional[Dict[str, Any]] = None # Devolve o JSON
+    date: datetime
+    class Config:
+        from_attributes = True
         
         

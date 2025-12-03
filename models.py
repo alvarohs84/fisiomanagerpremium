@@ -91,3 +91,17 @@ class Assessment(Base):
     date = Column(DateTime, default=datetime.utcnow)
 
     patient = relationship("Patient", back_populates="assessments")
+    
+class Evolution(Base):
+    __tablename__ = "evolutions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"))
+    description = Column(String, nullable=False) # Texto livre
+    
+    # NOVO: Campo para guardar EVA, MRC e Goniometria estruturados
+    content = Column(JSON, nullable=True) 
+    
+    date = Column(DateTime, default=datetime.utcnow)
+
+    patient = relationship("Patient", back_populates="evolutions")
