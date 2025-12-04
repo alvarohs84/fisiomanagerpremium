@@ -4,16 +4,21 @@ from database import Base
 from datetime import date, datetime
 
 # ======================================================
-# USUÁRIOS
+# USUÁRIOS (ATUALIZADO)
 # ======================================================
 class User(Base):
     __tablename__ = "users"
+
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String)
+    
+    # Novos campos
+    full_name = Column(String, nullable=True)   # Nome completo (ex: Dr. Alvaro)
+    role = Column(String, default="fisio")      # admin, fisio, recepcao
 
 # ======================================================
-# PACIENTES (ATUALIZADO)
+# PACIENTES
 # ======================================================
 class Patient(Base):
     __tablename__ = "patients"
@@ -26,7 +31,6 @@ class Patient(Base):
     phone = Column(String, nullable=True)
     insurance = Column(String, nullable=True)
     
-    # --- NOVOS CAMPOS DE DIAGNÓSTICO ---
     medical_diagnosis = Column(String, nullable=True)
     functional_diagnosis = Column(String, nullable=True)
 
@@ -48,7 +52,7 @@ class Evolution(Base):
     id = Column(Integer, primary_key=True, index=True)
     patient_id = Column(Integer, ForeignKey("patients.id"))
     description = Column(String, nullable=False)
-    content = Column(JSON, nullable=True) # Guarda os dados de EVA, MRC, ADM
+    content = Column(JSON, nullable=True)
     date = Column(DateTime, default=datetime.utcnow)
     patient = relationship("Patient", back_populates="evolutions")
 

@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import date, datetime
 from typing import Optional, Dict, Any
 
-# AUTH
+# AUTH & USERS
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -11,9 +11,23 @@ class UserLogin(BaseModel):
     username: str
     password: str
     
-class AdminCreate(BaseModel):
+class UserCreate(BaseModel): # Para criar novos usuários
     username: str
     password: str
+    full_name: str
+    role: str = "fisio"
+
+class UserOut(BaseModel): # Para listar usuários
+    id: int
+    username: str
+    full_name: Optional[str] = None
+    role: str
+    class Config:
+        from_attributes = True
+
+class UserPasswordUpdate(BaseModel):
+    old_password: str
+    new_password: str
 
 # PACIENTES
 class PatientBase(BaseModel):
@@ -22,8 +36,8 @@ class PatientBase(BaseModel):
     sex: Optional[str] = None
     phone: Optional[str] = None
     insurance: Optional[str] = None
-    medical_diagnosis: Optional[str] = None       # Novo
-    functional_diagnosis: Optional[str] = None    # Novo
+    medical_diagnosis: Optional[str] = None
+    functional_diagnosis: Optional[str] = None
 
 class PatientCreate(PatientBase):
     pass
@@ -34,8 +48,8 @@ class PatientUpdate(BaseModel):
     sex: Optional[str] = None
     phone: Optional[str] = None
     insurance: Optional[str] = None
-    medical_diagnosis: Optional[str] = None       # Novo
-    functional_diagnosis: Optional[str] = None    # Novo
+    medical_diagnosis: Optional[str] = None
+    functional_diagnosis: Optional[str] = None
 
 class PatientOut(PatientBase):
     id: int
@@ -110,10 +124,5 @@ class AssessmentOut(BaseModel):
     date: datetime
     class Config:
         from_attributes = True
-
-# USUÁRIOS
-class UserPasswordUpdate(BaseModel):
-    old_password: str
-    new_password: str
         
         
